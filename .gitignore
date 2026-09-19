@@ -1,0 +1,13 @@
+# ── D1 打包守卫 ─────────────────────────────────────────────
+# 索引缓存是派生数据，**绝不能随 skill 包分发**：
+# 一份 11 MB 的 pkl 会让单次安装白占体积的 99%，而它首次检索即可自动重建。
+# 缓存的正确位置是包外：~/.workbuddy/cache/shifeng-persona-v2/
+# （可用环境变量 SHIFENG_CACHE 覆盖；`retrieve.py --cache-info` 可自检。）
+*.pkl
+_bm25_index.pkl
+scripts/_bm25_index.pkl
+
+# 运行期产物
+__pycache__/
+*.pyc
+.cache/
