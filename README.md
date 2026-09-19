@@ -2,7 +2,7 @@
   <img src="assets/avatar.jpg" alt="石枫" width="140" />
 </p>
 
-<h1 align="center">🍁 石枫 · 思维操作系统 v2（检索增强版）</h1>
+<h1 align="center">🍁 石枫skill（检索增强版）</h1>
 
 <p align="center">
   <b>知乎保守主义思想圈作者「石枫」的立场与文风模拟 skill</b><br/>
