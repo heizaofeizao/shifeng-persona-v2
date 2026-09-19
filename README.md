@@ -36,6 +36,12 @@
   不是 LLM 先验里那串 generic 保守主义。
 - **去 AI 味（v2.2–v2.5）**：禁机械分层（"第一层/第二层"）、禁元叙事开场、
   禁元数据自陈。第一人称，从不汇报自己的档案。
+- **文风指纹四层闸门（v2.7–v3.0）**：把「像不像」从形容词变成可比对的数字——
+  **L1 标点**（他几乎不用叹号；回答里讲解冒号的中位数是 **0**）·
+  **L2 句法**（长句逗号链、句末反问率 24%、招牌动作「引述包抄」）·
+  **L3 篇章**（六种真实骨架、段落链式咬合、结尾禁止一切收束动作）·
+  **L4 论战**（对上眼靶子时的德性攻击四拍）。
+  交付前跑 `python scripts/style_check.py draft.txt`，**告警须归零**。
 
 ## 快速开始
 
@@ -50,6 +56,7 @@ cp -r shifeng-persona-v2 ~/.workbuddy/skills/
 python scripts/retrieve.py "全球化" -k 5
 python scripts/stance_conf.py "死刑该不该废除"
 python scripts/graph_walk.py "哈耶克" --path "孔子"
+python scripts/style_check.py draft.txt        # 文风指纹自检，告警须归零
 ```
 
 激活后直接说：「用石枫的视角聊聊 X」「石枫会怎么看 Y」「写一段杨佩帆式小说」。
@@ -85,9 +92,9 @@ python scripts/graph_walk.py "哈耶克" --path "孔子"
 
 ```
 shifeng-persona-v2/
-├── SKILL.md                  # 核心卡：五步流水线 + 视角铁律 + 心智模型
-├── modules/                  # 懒加载模块：路由 / 文风 / 词表 / 检索指南 / QC / 立场库
-├── scripts/                  # 引擎：retrieve(P0) / stance_conf(P3) / graph_walk(P4) / run_regression(P5)
+├── SKILL.md                  # 核心卡：六步流水线 + 视角铁律 + 心智模型
+├── modules/                  # 懒加载模块：路由 / 文风四层 / 论战 / 词表 / 检索指南 / QC / 立场库
+├── scripts/                  # 引擎：retrieve(P0) / stance_conf(P3) / graph_walk(P4) / style_check(P6) / run_regression(P5·70 项自检)
 ├── references/research/      # 深度调研底稿（六维度）
 ├── corpus/                   # final_corpus.jsonl（1686 条）+ knowledge_graph.json
 ├── tests/                    # golden cases + 各轮测试件
