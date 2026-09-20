@@ -96,13 +96,15 @@ python scripts/style_check.py draft.txt        # 文风指纹自检，告警须�
 
 ```
 shifeng-persona-v2/
-├── SKILL.md                  # 核心卡：六步流水线 + 视角铁律 + 心智模型
+├── SKILL.md                  # 核心卡（精简常驻）：六步流水线 + 视角铁律 + 心智模型
+├── CHANGELOG.md              # 版本沿革（v1.0 起，含每次改动的起因与语料实测证据）
 ├── modules/                  # 懒加载模块：路由 / 文风 L1-L4 + L2b欧式 + L2c反口语化 / 词表 / 检索指南 / QC / 立场库
 ├── scripts/                  # 引擎：retrieve(P0) / stance_conf(P3) / graph_walk(P4) / style_check(P6·六层) / run_regression(P5·82 项自检)
-├── references/research/      # 深度调研底稿（六维度）
+├── references/research/      # 深度调研底稿（六维度，懒加载）
 ├── corpus/                   # final_corpus.jsonl（1686 条）+ knowledge_graph.json
-├── tests/                    # golden cases + 各轮测试件
+├── tests/                    # golden_cases.md（LLM 质量用例）+ archive/（历轮过程记录）
+├── docs/archive/             # 一次性开发文档（如 v2.5 全文件审计报告）
 └── assets/                   # 头像
 ```
 
-> 版本沿革与全部设计决策见 `SKILL.md` 文末。调研截止 2026-09-18，此后动态未收录。
+> 版本沿革见 `CHANGELOG.md`。调研截止 2026-09-18，此后动态未收录。
