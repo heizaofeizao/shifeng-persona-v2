@@ -153,6 +153,24 @@ RULE_CHECKS = [
      "scripts/style_check.py", ["INV_TARGET", "INV_REVERSE", "def invective"]),
     ("论战", "style-short 自检清单已挂论战闸门",
      "modules/style-short.md", ["style-invective"]),
+    # ── v3.2（2026-09-20）L2b 欧式长句 + L2c 反口语化 ──
+    ("欧化", "L2b 欧式长句模块存在（六装置：定语链/关联配套/名词化/关系化/分号/破折号）",
+     "modules/style-euro.md", ["的-定语链", "关联词配套", "名词化", "分号长复句"]),
+    ("欧化", "L2b 与 L3 作文腔的区分讲清楚（去作文腔时勿把欧化一起铲掉）",
+     "modules/style-euro.md", ["欧化 ≠ 作文腔", "纵向", "横向"]),
+    ("欧化", "L2b 带缺口实测表（四稿联动配套/的链/分号全为 0 的举证）",
+     "modules/style-euro.md", ["缺口实测", "全军覆没"]),
+    ("口语", "L2c 反口语化硬禁表存在（每条须回语料核验 ≤0.2%）",
+     "modules/style-euro.md", ["硬禁句式", "你去…就明白", "哪门子"]),
+    ("口语", "L2c 句尾语气词只禁他近乎不用的（呢/吗/吧/啊/嘛 必须放行）",
+     "modules/style-euro.md", ["呗 啦 哦 哟 咯 嗯 呀", "签名"]),
+    ("欧化", "style_check 含 L2b/L2c 常量与函数（v5 勿再丢）",
+     "scripts/style_check.py", ["EURO_BASE", "COLLOQ_BAN", "COLLOQ_TAIL_BAN",
+                               "def euro", "def colloquial"]),
+    ("文风", "style-diction 已订正黑名单误报（赋能/闭环/破局/生态位 是他真用词）",
+     "modules/style-diction.md", ["2026-09-20 订正", "生态位"]),
+    ("文风", "style-diction 已挂 L2b 指针（长度够≠肌理对）",
+     "modules/style-diction.md", ["style-euro.md", "长度相同，句法血统不同"]),
 ]
 
 FRONTMATTER_KEYS = ["name:", "description:", "type:"]
@@ -264,6 +282,71 @@ def check_corpus():
                     else "⚠️ 他其实用过，不应列黑名单：%s" % "、".join(bad)))
     except Exception as e:
         out.append(("文风", "黑名单语料守卫", False, str(e)))
+
+    # L2c 口语硬禁表语料守卫（v3.2）：同 UNWANTED 的道理，但更严 —— 每条 pattern
+    # 的篇占比必须 ≤0.2%（全语料最多 2 篇）。加词前若不验，就会把他写过的话判成错。
+    try:
+        import importlib, json, re as _re
+        sc = importlib.import_module("style_check")
+        N = 0
+        viol = []
+        rx_all = [(p, _re.compile(p), why) for p, why in sc.COLLOQ_BAN]
+        for line in open(DEFAULT_CORPUS, encoding="utf-8"):
+            d = json.loads(line)
+            if d.get("category") == "fiction":
+                continue
+            t = (d.get("text") or "").strip()
+            if len(t) < 120:
+                continue
+            N += 1
+            for p, rx, why in rx_all:
+                if rx.search(t):
+                    viol.append((p, why))
+        cnt = {}
+        for p, why in viol:
+            cnt[p] = cnt.get(p, 0) + 1
+        lim = getattr(sc, "COLLOQ_BAN_MAXRATE", 0.005)
+        over = [(p, c) for p, c in cnt.items() if c / max(N, 1) > lim]
+        out.append(("口语", "L2c 硬禁表每条篇占比 ≤%.1f%%（加词前必须回语料核验）" % (lim * 100),
+                    not over,
+                    "ok，%d 条全部达标（语料 %d 篇）" % (len(sc.COLLOQ_BAN), N) if not over
+                    else "⚠️ 他其实写过，不该硬禁：%s" % "；".join(
+                        "%s(%d篇)" % (p, c) for p, c in over)))
+    except Exception as e:
+        out.append(("口语", "L2c 硬禁表语料守卫", False, str(e)))
+
+    # L2c 非空转验证（v3.2）：闸门必须真的会响。探针含「你去…就明白」+「哪门子」+
+    # 「呗。」各一处，应至少报出 L2c 硬禁与句尾语气词；干净文本则不应报 L2c。
+    try:
+        import importlib
+        sc = importlib.import_module("style_check")
+        dirty = "你去那几个问题底下扫一眼就明白，这算哪门子自由主义，意思一下得了呗。"
+        clean = ("保守主义意味着将社会变革转化为社会革新，没有秩序的变革无论动机好坏"
+                 "最终都只会得到弱肉强食的无序状态。")
+        d_hard, d_over, d_tail, _ = sc.colloquial(dirty)
+        c_hard, c_over, c_tail, _ = sc.colloquial(clean)
+        ok = bool(d_hard) and bool(d_tail) and not c_hard and not c_tail
+        out.append(("口语", "L2c 非空转：脏文本必报、净文本不报（闸门不许空转）", ok,
+                    "ok，脏文本硬禁 %d 处 / 语气词 %d 处；净文本 0" % (len(d_hard), len(d_tail))
+                    if ok else "⚠️ 脏=%s/%s 净=%s/%s" % (d_hard, d_tail, c_hard, c_tail)))
+    except Exception as e:
+        out.append(("口语", "L2c 非空转验证", False, str(e)))
+
+    # L2b 非空转验证（v3.2）：有欧化装置的文本，四项均须 >0。
+    try:
+        import importlib
+        sc = importlib.import_module("style_check")
+        euro_txt = ("尽管股市缓慢攀升，但本国的劳动者并未享受到许多上层人士所享有的复苏；"
+                    "也正因为如此，他对实在论的坚持、对自然法的推崇、对自发秩序的认同，"
+                    "无论动机好坏最终都只会得到弱肉强食的无序状态。")
+        e = sc.euro(euro_txt)
+        ok = e["关联配套"] > 0 and e["的定语链"] > 0 and e["_分号长复句"] >= 1
+        out.append(("欧化", "L2b 非空转：含欧化装置的文本必须被检出（闸门不许空转）", ok,
+                    "ok，配套 %.1f / 的链 %.1f / 分号 %d" % (
+                        e["关联配套"], e["的定语链"], e["_分号长复句"])
+                    if ok else "⚠️ 未检出：%s" % e))
+    except Exception as e:
+        out.append(("欧化", "L2b 非空转验证", False, str(e)))
     return out
 
 
