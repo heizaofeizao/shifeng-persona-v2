@@ -249,6 +249,21 @@ def check_corpus():
                     "ok" if ok else "路径失效，需设 SHIFENG_CORPUS"))
     except Exception as e:
         out.append(("语料", "导入 retrieve 模块", False, str(e)))
+
+    # 黑名单语料守卫（2026-09-20）：UNWANTED 是「他没说过」的断言 —— 每个词都必须
+    # 回语料验证。2026-09-20 实测发现原表 8 词里 4 个是他真用过的（生态位 10 篇 /
+    # 赋能 2 篇 / 闭环 2 篇 / 破局 1 篇），闸门因此误伤。此断言把该 bug 钉死。
+    try:
+        import importlib
+        sc = importlib.import_module("style_check")
+        raw = open(DEFAULT_CORPUS, encoding="utf-8").read()
+        bad = [w for w in sc.UNWANTED if w in raw]
+        out.append(("文风", "UNWANTED 黑名单词均未被语料使用（防误报，勿再把他说过的词加回）",
+                    not bad,
+                    "ok，%d 词全部零命中" % len(sc.UNWANTED) if not bad
+                    else "⚠️ 他其实用过，不应列黑名单：%s" % "、".join(bad)))
+    except Exception as e:
+        out.append(("文风", "黑名单语料守卫", False, str(e)))
     return out
 
 
